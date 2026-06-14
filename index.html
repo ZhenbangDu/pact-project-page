@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PACT: Privileged Trace Co-Training for Multi-Turn Tool-Use Agents. PACT uses expert traces as training-time optimization signals while keeping rollouts prompt-only.">
+  <meta name="keywords" content="PACT, tool-use agents, reinforcement learning, supervised fine-tuning, expert traces, multi-turn tool use">
+  <meta name="author" content="Zhenbang Du, Jun Luo, Zhiwei Zheng, Xiangchi Yuan, Kejing Xia, Dachuan Shi, Qirui Jin, Qijia He, Shaofeng Zou, Yingbin Liang, Wenke Lee">
+  <meta property="og:title" content="PACT: Privileged Trace Co-Training for Multi-Turn Tool-Use Agents">
+  <meta property="og:description" content="Expert traces guide optimization without being used as rollout hints.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./static/images/teaser.png">
+  <title>PACT: Privileged Trace Co-Training for Multi-Turn Tool-Use Agents</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+</head>
+<body>
+  <nav class="navbar page-nav" role="navigation" aria-label="main navigation">
+    <div class="container is-max-desktop">
+      <div class="navbar-brand">
+        <a class="navbar-item nav-brand" href="#top" aria-label="PACT home">
+          PACT
+        </a>
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="project-nav">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+      <div id="project-nav" class="navbar-menu">
+        <div class="navbar-end">
+          <a class="navbar-item" href="#abstract">Abstract</a>
+          <a class="navbar-item" href="#method">Method</a>
+          <a class="navbar-item" href="#results">Results</a>
+          <a class="navbar-item" href="#citation">Citation</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <section class="hero publication-hero">
+      <div class="hero-body">
+        <div class="container is-max-desktop has-text-centered">
+          <p class="venue-label">Preprint</p>
+          <h1 class="title publication-title">
+            <span class="title-line">PACT: Privileged Trace Co-Training</span>
+            <span class="title-line">for Multi-Turn Tool-Use Agents</span>
+          </h1>
+
+          <div class="publication-authors">
+            <span class="author-block"><a href="https://zhenbangdu.github.io/" target="_blank" rel="noopener noreferrer">Zhenbang Du</a><sup>1,*</sup></span>
+            <span class="author-block"><a href="https://scholar.google.com/citations?user=hsogUvQAAAAJ&amp;hl=en" target="_blank" rel="noopener noreferrer">Jun Luo</a><sup>2,*</sup></span>
+            <span class="author-block"><a href="https://zhiwei-zzz.github.io/" target="_blank" rel="noopener noreferrer">Zhiwei Zheng</a><sup>3</sup></span>
+            <span class="author-block"><a href="https://xiangchi-yuan.github.io/" target="_blank" rel="noopener noreferrer">Xiangchi Yuan</a><sup>1</sup></span>
+            <span class="author-block"><a href="https://les1a.github.io/" target="_blank" rel="noopener noreferrer">Kejing Xia</a><sup>1</sup></span>
+            <span class="author-block"><a href="https://dachuanshi.com/" target="_blank" rel="noopener noreferrer">Dachuan Shi</a><sup>1</sup></span>
+            <span class="author-block"><a href="https://c-lister.github.io/" target="_blank" rel="noopener noreferrer">Qirui Jin</a><sup>1</sup></span>
+            <span class="author-block"><a href="https://heqijia.github.io/" target="_blank" rel="noopener noreferrer">Qijia He</a><sup>2</sup></span>
+            <span class="author-block"><a href="https://sites.google.com/view/szou/home" target="_blank" rel="noopener noreferrer">Shaofeng Zou</a><sup>4</sup></span>
+            <span class="author-block"><a href="https://sites.google.com/view/yingbinliang/home" target="_blank" rel="noopener noreferrer">Yingbin Liang</a><sup>2</sup></span>
+            <span class="author-block"><a href="https://wenke.gtisc.gatech.edu/" target="_blank" rel="noopener noreferrer">Wenke Lee</a><sup>1</sup></span>
+          </div>
+
+          <div class="publication-affiliations">
+            <span><sup>1</sup>Georgia Institute of Technology</span>
+            <span><sup>2</sup>Ohio State University</span>
+            <span><sup>3</sup>University of Pennsylvania</span>
+            <span><sup>4</sup>Arizona State University</span>
+          </div>
+          <p class="equal-note">* Equal contribution</p>
+
+          <div class="publication-links">
+            <!-- TODO: Replace placeholder href values with final arXiv, code, Hugging Face model, and Hugging Face dataset URLs. -->
+            <a href="#" class="button is-dark project-button" aria-label="arXiv placeholder">
+              <span class="icon"><i class="fa-solid fa-scroll"></i></span>
+              <span>arXiv</span>
+            </a>
+            <a href="#" class="button is-dark project-button" aria-label="Code placeholder">
+              <span class="icon"><i class="fa-brands fa-github"></i></span>
+              <span>Code</span>
+            </a>
+            <a href="https://huggingface.co/" class="button is-dark project-button" aria-label="Hugging Face model placeholder">
+              <span class="icon">
+                <img class="hf-logo-icon" src="https://huggingface.co/datasets/huggingface/brand-assets/resolve/main/hf-logo.svg" alt="" aria-hidden="true">
+              </span>
+              <span>HF Model</span>
+            </a>
+            <a href="https://huggingface.co/datasets" class="button is-dark project-button" aria-label="Hugging Face dataset placeholder">
+              <span class="icon">
+                <img class="hf-logo-icon" src="https://huggingface.co/datasets/huggingface/brand-assets/resolve/main/hf-logo.svg" alt="" aria-hidden="true">
+              </span>
+              <span>HF Dataset</span>
+            </a>
+          </div>
+
+          <figure class="teaser-figure">
+            <img src="./static/images/teaser.png" alt="PACT comparison with hint-guided training and prompt-only rollout optimization">
+            <figcaption>
+              PACT keeps rollouts prompt-only, then uses expert traces as privileged optimization signals for training.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section paper-section section-tint" id="abstract">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column is-four-fifths">
+            <h2 class="title is-3 section-title has-text-centered">Abstract</h2>
+            <div class="tldr">
+              <strong>TL;DR:</strong> PACT uses expert tool-use traces only during optimization, not rollout generation, combining trace-conditioned RL with component-aware SFT.
+            </div>
+            <div class="content paper-copy">
+              <p>
+                Multi-turn tool-use agents must reason, call tools, and adapt to observations across several interaction turns. Post-training such agents is challenging, as reinforcement learning often suffers from sparse rewards and weak credit assignment despite matching the prompt-only inference setting, while supervised fine-tuning on expert traces provides dense process supervision but can over-constrain the model to fixed trajectories. To tackle this, we propose <strong>PACT</strong>, a <strong>P</strong>rivileged tr<strong>A</strong>ce <strong>C</strong>o-<strong>T</strong>raining framework for multi-turn tool-use agents. The key idea is to use expert traces only as training-time optimization signals rather than rollout-time hints. PACT keeps rollout generation prompt-only, then uses expert traces to guide optimization through two complementary signals: a trace-conditioned RL surrogate that evaluates prompt-only rollouts under expert-trace context, and a component-aware SFT loss that supervises reasoning prefixes and tool-calls with annealed strength. To reduce over-reliance on the training-only trace context, PACT further introduces a prompt-only anchoring. We also provide a latent-trace view that connects the two trace-based objectives and explains how expert traces can guide optimization without being used during rollout generation. Experiments on FTRL, BFCL, and ToolHop show that PACT consistently improves over strong SFT- and RL-based baselines, highlighting the value of privileged trace co-training for multi-turn tool-use learning.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section paper-section" id="motivation">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 section-title has-text-centered">Motivation</h2>
+        <div class="motivation-grid">
+          <article class="info-card">
+            <div class="card-icon sft"><i class="fa-solid fa-route"></i></div>
+            <h3>Full-trace SFT can over-imitate</h3>
+            <p>Expert traces are useful, but multi-turn tool-use tasks admit multiple valid paths. Treating a single trace as a fixed target can overfit teacher-specific decisions.</p>
+          </article>
+          <article class="info-card">
+            <div class="card-icon rl"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Prompt-only RL is under-guided</h3>
+            <p>Rollout RL matches inference, but sparse trajectory-level rewards give weak credit assignment for intermediate reasoning, tool choices, and arguments.</p>
+          </article>
+          <article class="info-card">
+            <div class="card-icon hint"><i class="fa-solid fa-eye-slash"></i></div>
+            <h3>Hints create input mismatch</h3>
+            <p>Using expert traces as rollout hints changes the training input condition. PACT instead reserves traces for optimization while sampling rollouts from the original prompt.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section paper-section section-tint" id="method">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 section-title has-text-centered">Method</h2>
+        <div class="content paper-copy method-intro">
+          <p>
+            PACT decouples exploration from privileged supervision. The policy samples prompt-only rollouts, scores those rollouts under an expert-trace context, and supervises selected model-controllable parts of the expert trace.
+          </p>
+        </div>
+
+        <figure class="method-figure">
+          <img src="./static/images/method.png" alt="PACT method overview showing prompt-only rollout and privileged trace co-training">
+          <figcaption>
+            Overview of prompt-only rollout generation and privileged trace co-training.
+          </figcaption>
+        </figure>
+
+        <div class="method-steps">
+          <article>
+            <span class="step-number">1</span>
+            <h3>Prompt-only rollout</h3>
+            <p>For each prompt, PACT samples rollouts only from the original user prompt, preserving the same input condition used at inference time.</p>
+          </article>
+          <article>
+            <span class="step-number">2</span>
+            <h3>Trace-conditioned RL</h3>
+            <p>The same prompt-only rollouts are evaluated under a privileged expert-trace context, producing a reward-weighted optimization signal without trace-guided generation.</p>
+          </article>
+          <article>
+            <span class="step-number">3</span>
+            <h3>Component-aware SFT</h3>
+            <p>Reasoning prefixes and complete tool-call spans receive supervised loss, while environment tool responses remain context and are never prediction targets.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section paper-section" id="results">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 section-title has-text-centered">Results</h2>
+        <p class="section-lead">
+          PACT improves average performance across FTRL, BFCL, and ToolHop for both evaluated Qwen3 model sizes.
+        </p>
+
+        <div class="result-highlights">
+          <article class="metric-card">
+            <span class="metric-label">Qwen3-1.7B Avg</span>
+            <strong>23.08</strong>
+            <span>vs. 20.96 best baseline</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Qwen3-4B Avg</span>
+            <strong>36.90</strong>
+            <span>vs. 32.66 best baseline</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Qwen3-4B FTRL Solve-R</span>
+            <strong>42.41</strong>
+            <span>vs. 37.17 best baseline</span>
+          </article>
+          <article class="metric-card">
+            <span class="metric-label">Qwen3-4B BFCL Avg</span>
+            <strong>21.26</strong>
+            <span>vs. 18.83 best baseline</span>
+          </article>
+        </div>
+
+        <div class="table-wrap" aria-label="Complete main results table">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th rowspan="2">Method</th>
+                <th colspan="3">FTRL</th>
+                <th colspan="4">BFCL</th>
+                <th>ToolHop</th>
+                <th rowspan="2">Avg</th>
+              </tr>
+              <tr>
+                <th>Solve-R</th>
+                <th>Solve-P</th>
+                <th>Solve-F1</th>
+                <th>Multi-Turn</th>
+                <th>Search</th>
+                <th>Memory</th>
+                <th>Avg</th>
+                <th>AC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="model-row">
+                <td colspan="10">Qwen3-1.7B</td>
+              </tr>
+              <tr>
+                <td>Vanilla</td>
+                <td>21.66</td>
+                <td>20.78</td>
+                <td>19.72</td>
+                <td>13.00</td>
+                <td>1.00</td>
+                <td>8.60</td>
+                <td>7.53</td>
+                <td>25.63</td>
+                <td>17.63</td>
+              </tr>
+              <tr>
+                <td>SFT</td>
+                <td>22.36</td>
+                <td>17.89</td>
+                <td>17.66</td>
+                <td>13.38</td>
+                <td>2.50</td>
+                <td>8.60</td>
+                <td>8.16</td>
+                <td>23.32</td>
+                <td>16.38</td>
+              </tr>
+              <tr>
+                <td>GRPO</td>
+                <td>21.57</td>
+                <td>17.37</td>
+                <td>18.13</td>
+                <td>11.88</td>
+                <td>3.50</td>
+                <td>9.25</td>
+                <td>8.21</td>
+                <td>25.13</td>
+                <td>17.16</td>
+              </tr>
+              <tr>
+                <td>FTRL</td>
+                <td>22.78</td>
+                <td>22.06</td>
+                <td>21.06</td>
+                <td>12.62</td>
+                <td>6.00</td>
+                <td>11.18</td>
+                <td>9.93</td>
+                <td>26.43</td>
+                <td>19.14</td>
+              </tr>
+              <tr>
+                <td>ToolRL</td>
+                <td>22.79</td>
+                <td>17.93</td>
+                <td>17.99</td>
+                <td>13.30</td>
+                <td>2.50</td>
+                <td>8.39</td>
+                <td>8.06</td>
+                <td>25.83</td>
+                <td>17.29</td>
+              </tr>
+              <tr>
+                <td>CHORD</td>
+                <td>22.68</td>
+                <td>19.14</td>
+                <td>18.50</td>
+                <td>12.62</td>
+                <td>3.50</td>
+                <td>6.45</td>
+                <td>7.52</td>
+                <td>27.14</td>
+                <td>17.72</td>
+              </tr>
+              <tr>
+                <td>MatchTIR</td>
+                <td>24.12</td>
+                <td>21.50</td>
+                <td>21.43</td>
+                <td>14.00</td>
+                <td>4.50</td>
+                <td>9.03</td>
+                <td>9.18</td>
+                <td>32.26</td>
+                <td>20.96</td>
+              </tr>
+              <tr>
+                <td>SFT→MatchTIR</td>
+                <td>23.39</td>
+                <td>19.64</td>
+                <td>19.72</td>
+                <td>13.63</td>
+                <td>5.50</td>
+                <td>11.18</td>
+                <td>10.10</td>
+                <td>31.06</td>
+                <td>20.29</td>
+              </tr>
+              <tr class="ours-row">
+                <td>PACT</td>
+                <td>28.33</td>
+                <td>26.94</td>
+                <td>22.93</td>
+                <td>14.88</td>
+                <td>7.00</td>
+                <td>13.63</td>
+                <td>11.84</td>
+                <td>34.47</td>
+                <td>23.08</td>
+              </tr>
+              <tr class="model-row">
+                <td colspan="10">Qwen3-4B</td>
+              </tr>
+              <tr>
+                <td>Vanilla</td>
+                <td>32.14</td>
+                <td>31.66</td>
+                <td>28.60</td>
+                <td>23.50</td>
+                <td>12.00</td>
+                <td>16.34</td>
+                <td>17.28</td>
+                <td>31.86</td>
+                <td>25.91</td>
+              </tr>
+              <tr>
+                <td>SFT</td>
+                <td>28.19</td>
+                <td>29.32</td>
+                <td>24.67</td>
+                <td>22.62</td>
+                <td>4.00</td>
+                <td>12.90</td>
+                <td>13.17</td>
+                <td>30.25</td>
+                <td>22.70</td>
+              </tr>
+              <tr>
+                <td>GRPO</td>
+                <td>33.12</td>
+                <td>31.80</td>
+                <td>30.84</td>
+                <td>22.00</td>
+                <td>9.00</td>
+                <td>15.48</td>
+                <td>15.49</td>
+                <td>34.47</td>
+                <td>26.93</td>
+              </tr>
+              <tr>
+                <td>FTRL</td>
+                <td>31.98</td>
+                <td>33.24</td>
+                <td>31.34</td>
+                <td>22.38</td>
+                <td>9.00</td>
+                <td>16.77</td>
+                <td>16.05</td>
+                <td>43.02</td>
+                <td>30.14</td>
+              </tr>
+              <tr>
+                <td>ToolRL</td>
+                <td>32.59</td>
+                <td>28.98</td>
+                <td>28.28</td>
+                <td>23.00</td>
+                <td>11.00</td>
+                <td>17.42</td>
+                <td>17.14</td>
+                <td>34.27</td>
+                <td>26.56</td>
+              </tr>
+              <tr>
+                <td>CHORD</td>
+                <td>32.69</td>
+                <td>29.84</td>
+                <td>29.88</td>
+                <td>22.00</td>
+                <td>12.50</td>
+                <td>15.48</td>
+                <td>16.66</td>
+                <td>37.69</td>
+                <td>28.08</td>
+              </tr>
+              <tr>
+                <td>MatchTIR</td>
+                <td>36.10</td>
+                <td>30.60</td>
+                <td>31.60</td>
+                <td>24.38</td>
+                <td>17.50</td>
+                <td>14.62</td>
+                <td>18.83</td>
+                <td>47.54</td>
+                <td>32.66</td>
+              </tr>
+              <tr>
+                <td>SFT→MatchTIR</td>
+                <td>37.17</td>
+                <td>30.40</td>
+                <td>32.03</td>
+                <td>23.62</td>
+                <td>17.85</td>
+                <td>13.76</td>
+                <td>18.41</td>
+                <td>47.34</td>
+                <td>32.59</td>
+              </tr>
+              <tr class="ours-row">
+                <td>PACT</td>
+                <td>42.41</td>
+                <td>34.69</td>
+                <td>36.60</td>
+                <td>27.50</td>
+                <td>18.00</td>
+                <td>18.28</td>
+                <td>21.26</td>
+                <td>49.55</td>
+                <td>36.90</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Complete main results from the paper. AC denotes Answer Correctness.</p>
+      </div>
+    </section>
+
+    <section class="section paper-section" id="citation">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 section-title has-text-centered">BibTeX</h2>
+        <div class="citation-box">
+          <button class="copy-button" type="button" data-copy-target="bibtex" aria-label="Copy BibTeX">
+            <span class="icon"><i class="fa-regular fa-copy"></i></span>
+            <span>Copy</span>
+          </button>
+<pre id="bibtex"><code>@article{du2026pact,
+  title={PACT: Privileged Trace Co-Training for Multi-Turn Tool-Use Agents},
+  author={Du, Zhenbang and Luo, Jun and Zheng, Zhiwei and Yuan, Xiangchi and Xia, Kejing and Shi, Dachuan and Jin, Qirui and He, Qijia and Zou, Shaofeng and Liang, Yingbin and Lee, Wenke},
+  journal={Preprint},
+  year={2026}
+}</code></pre>
+        </div>
+        <p class="table-note">Citation metadata will be updated after the final arXiv or venue record is available.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer project-footer">
+    <div class="content has-text-centered">
+      <p>
+        This page was adapted for PACT from the academic project page style used by the RAM project page.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const burger = document.querySelector('.navbar-burger');
+      const menu = document.getElementById(burger?.dataset.target || '');
+      if (burger && menu) {
+        burger.addEventListener('click', () => {
+          burger.classList.toggle('is-active');
+          menu.classList.toggle('is-active');
+        });
+      }
+
+      const copyButton = document.querySelector('[data-copy-target]');
+      if (copyButton) {
+        copyButton.addEventListener('click', async () => {
+          const target = document.getElementById(copyButton.dataset.copyTarget);
+          if (!target) return;
+          const text = target.innerText.trim();
+          try {
+            await navigator.clipboard.writeText(text);
+            copyButton.classList.add('copied');
+            copyButton.querySelector('span:last-child').textContent = 'Copied';
+            window.setTimeout(() => {
+              copyButton.classList.remove('copied');
+              copyButton.querySelector('span:last-child').textContent = 'Copy';
+            }, 1600);
+          } catch {
+            copyButton.querySelector('span:last-child').textContent = 'Select';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
