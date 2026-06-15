@@ -227,6 +227,12 @@ figcaption {
   margin-bottom: 1rem;
 }
 
+.paper-copy strong,
+.tldr strong {
+  color: inherit;
+  font-weight: 800;
+}
+
 .tldr {
   background: #edf7f2;
   border: 1px solid #cbe8dc;
