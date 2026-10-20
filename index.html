@@ -9,7 +9,7 @@
   <meta property="og:title" content="PACT: Privileged Trace Co-Training for Multi-Turn Tool-Use Agents">
   <meta property="og:description" content="Expert traces guide optimization without being used as rollout hints.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="./static/images/teaser.png">
+  <meta property="og:image" content="./static/images/teaser.png?v=20261020">
   <title>PACT: Privileged Trace Co-Training for Multi-Turn Tool-Use Agents</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260615">
+  <link rel="stylesheet" href="./static/css/index.css?v=20261020">
 </head>
 <body>
   <nav class="navbar page-nav" role="navigation" aria-label="main navigation">
@@ -76,7 +76,6 @@
           <p class="equal-note">* Equal contribution</p>
 
           <div class="publication-links">
-            <!-- TODO: Replace placeholder href values with final code and Hugging Face dataset URLs. -->
             <a href="https://arxiv.org/abs/2606.16215" class="button is-dark project-button" aria-label="arXiv paper">
               <span class="icon"><i class="fa-solid fa-scroll"></i></span>
               <span>arXiv</span>
@@ -91,18 +90,18 @@
               </span>
               <span>HF Model</span>
             </a>
-            <a href="#top" class="button is-dark project-button" aria-label="Hugging Face dataset placeholder">
+            <button type="button" class="button is-dark project-button" disabled aria-label="Hugging Face dataset link not yet available" title="Dataset link not yet available">
               <span class="icon">
                 <img class="hf-logo-icon" src="https://huggingface.co/datasets/huggingface/brand-assets/resolve/main/hf-logo.svg" alt="" aria-hidden="true">
               </span>
               <span>HF Dataset</span>
-            </a>
+            </button>
           </div>
 
           <figure class="teaser-figure">
-            <img src="./static/images/teaser.png" alt="PACT comparison with hint-guided training and prompt-only rollout optimization">
+            <img src="./static/images/teaser.png?v=20261020" alt="PACT comparison with hint-guided training and prompt-only rollout optimization">
             <figcaption>
-              PACT keeps rollouts prompt-only, then uses expert traces as privileged optimization signals for training.
+              PACT keeps rollouts prompt-only, then uses expert traces as privileged optimization signals. FTRL reports Solve-F1; the red gains are over the vanilla model.
             </figcaption>
           </figure>
         </div>
@@ -115,11 +114,11 @@
           <div class="column is-four-fifths">
             <h2 class="title is-3 section-title has-text-centered">Abstract</h2>
             <div class="tldr">
-              <strong>TL;DR:</strong> PACT uses expert tool-use traces only during optimization, not rollout generation, combining trace-conditioned RL with component-aware SFT.
+              <strong>TL;DR:</strong> PACT generates prompt-only rollouts and uses expert traces for trace-conditioned RL and component-aware SFT, with prompt-only RL anchoring.
             </div>
             <div class="content paper-copy">
               <p>
-                Multi-turn tool-use agents must reason, call tools, and adapt to observations across several interaction turns. Post-training such agents is challenging, as reinforcement learning often suffers from sparse rewards and weak credit assignment despite matching the prompt-only inference setting, while supervised fine-tuning on expert traces provides dense process supervision but can over-constrain the model to fixed trajectories. To tackle this, we propose <strong>PACT</strong>, a <strong>P</strong>rivileged tr<strong>A</strong>ce <strong>C</strong>o-<strong>T</strong>raining framework for multi-turn tool-use agents. The key idea is to use expert traces only as training-time optimization signals rather than rollout-time hints. PACT keeps rollout generation prompt-only, then uses expert traces to guide optimization through two complementary signals: a trace-conditioned RL surrogate that evaluates prompt-only rollouts under expert-trace context, and a component-aware SFT loss that supervises reasoning prefixes and tool-calls with annealed strength. To reduce over-reliance on the training-only trace context, PACT further introduces a prompt-only anchoring. We also provide a latent-trace view that connects the two trace-based objectives and explains how expert traces can guide optimization without being used during rollout generation. Experiments on FTRL, BFCL, and ToolHop show that PACT consistently improves over strong SFT- and RL-based baselines, highlighting the value of privileged trace co-training for multi-turn tool-use learning.
+                Multi-turn tool-use agents must reason, call tools, and adapt to observations across several interaction turns. Post-training such agents is challenging, as reinforcement learning often suffers from sparse rewards and weak credit assignment despite matching the prompt-only inference setting, while supervised fine-tuning on expert traces provides dense process supervision but can over-constrain the model to fixed trajectories. To tackle this, we propose <strong>PACT</strong>, a <strong>P</strong>rivileged tr<strong>A</strong>ce <strong>C</strong>o-<strong>T</strong>raining framework for multi-turn tool-use agents. The key idea is to use expert traces only as training-time optimization signals rather than rollout-time hints. PACT keeps rollout generation prompt-only, then uses expert traces to guide optimization through two complementary signals: a trace-conditioned RL surrogate that evaluates prompt-only rollouts under expert-trace context, and a component-aware SFT loss that provides annealed process supervision over reasoning and tool-call components. To reduce over-reliance on the training-only trace context, PACT incorporates prompt-only anchoring with standard prompt-only RL updates. Experiments on FTRL, BFCL, and ToolHop show that PACT consistently outperforms strong SFT- and RL-based baselines. Further analyses support the complementarity of the two training objectives and the benefits of component-aware supervision and prompt-only anchoring. These results highlight the effectiveness of privileged trace co-training for multi-turn tool-use learning.
               </p>
             </div>
           </div>
@@ -155,12 +154,12 @@
         <h2 class="title is-3 section-title has-text-centered">Method</h2>
         <div class="content paper-copy method-intro">
           <p>
-            PACT decouples exploration from privileged supervision. The policy samples prompt-only rollouts, scores those rollouts under an expert-trace context, and supervises selected model-controllable parts of the expert trace.
+            PACT decouples exploration from privileged supervision. The policy samples prompt-only rollouts, evaluates those rollouts under an expert-trace context, and supervises selected model-controllable parts of the expert trace. Trace-conditioned RL serves as an auxiliary optimization surrogate.
           </p>
         </div>
 
         <figure class="method-figure">
-          <img src="./static/images/method.png" alt="PACT method overview showing prompt-only rollout and privileged trace co-training">
+          <img src="./static/images/method.png?v=20261020" alt="PACT method overview showing prompt-only rollout and privileged trace co-training">
           <figcaption>
             Overview of prompt-only rollout generation and privileged trace co-training.
           </figcaption>
@@ -170,18 +169,22 @@
           <article>
             <span class="step-number">1</span>
             <h3>Prompt-only rollout</h3>
-            <p>For each prompt, PACT samples rollouts only from the original user prompt, preserving the same input condition used at inference time.</p>
+            <p>PACT generates rollouts from the task prompt and accumulated interaction history without expert traces. Rewards and advantages come from these prompt-only rollouts.</p>
           </article>
           <article>
             <span class="step-number">2</span>
             <h3>Trace-conditioned RL</h3>
-            <p>The same prompt-only rollouts are evaluated under a privileged expert-trace context, producing a reward-weighted optimization signal without trace-guided generation.</p>
+            <p>Both current and old policies evaluate the same sampled rollout under expert-trace context to compute token-level policy ratios, while retaining its original rewards and advantages.</p>
           </article>
           <article>
             <span class="step-number">3</span>
             <h3>Component-aware SFT</h3>
-            <p>Reasoning prefixes and complete tool-call spans receive supervised loss, while environment tool responses remain context and are never prediction targets.</p>
+            <p>Reasoning supervision shortens at semantic boundaries, while complete tool-call spans retain supervision with a decreasing loss weight. Tool observations serve only as context.</p>
           </article>
+        </div>
+        <div class="content paper-copy mt-5">
+          <p><strong>Prompt-only anchoring.</strong> A prompt-level gate selects standard prompt-only RL with probability <em>q</em>, or trace-conditioned RL plus component-aware SFT otherwise. The main experiments use <em>q</em> = 0.4 and an SFT coefficient of 0.1. Anchored prompts receive no trace-conditioned likelihood evaluation or SFT supervision.</p>
+          <p><strong>Annealed process supervision.</strong> Reasoning prefixes shrink from L<sub>4</sub> to L<sub>0</sub> within each assistant turn; at L<sub>0</sub>, reasoning remains in the input context without direct SFT loss. Tool names and all argument tokens remain supervised as their imitation weight decreases. At inference, the agent uses only the task prompt and ordinary interaction history.</p>
         </div>
       </div>
     </section>
@@ -190,24 +193,24 @@
       <div class="container is-max-desktop">
         <h2 class="title is-3 section-title has-text-centered">Results</h2>
         <p class="section-lead">
-          PACT improves average performance across FTRL, BFCL, and ToolHop for both evaluated Qwen3 model sizes.
+          PACT achieves the highest overall average on both Qwen3 model sizes, improving over MatchTIR by 2.12 points on Qwen3-1.7B and 3.14 points on Qwen3-4B.
         </p>
 
         <div class="result-highlights">
           <article class="metric-card">
             <span class="metric-label">Qwen3-1.7B Avg</span>
-            <strong>24.90</strong>
-            <span>vs. 21.70 best baseline</span>
+            <strong>23.08</strong>
+            <span>vs. 20.96 MatchTIR</span>
           </article>
           <article class="metric-card">
             <span class="metric-label">Qwen3-4B Avg</span>
-            <strong>36.90</strong>
-            <span>vs. 33.07 best baseline</span>
+            <strong>35.80</strong>
+            <span>vs. 32.66 MatchTIR</span>
           </article>
           <article class="metric-card">
-            <span class="metric-label">Qwen3-4B FTRL Solve-R</span>
-            <strong>42.41</strong>
-            <span>vs. 37.17 best baseline</span>
+            <span class="metric-label">Qwen3-4B FTRL Solve-F1</span>
+            <strong>36.60</strong>
+            <span>vs. 32.03 best baseline</span>
           </article>
           <article class="metric-card">
             <span class="metric-label">Qwen3-4B BFCL Avg</span>
@@ -251,7 +254,7 @@
                 <td>8.60</td>
                 <td>7.53</td>
                 <td>25.63</td>
-                <td>19.06</td>
+                <td>17.63</td>
               </tr>
               <tr>
                 <td>SFT</td>
@@ -263,7 +266,7 @@
                 <td>8.60</td>
                 <td>8.16</td>
                 <td>23.32</td>
-                <td>17.88</td>
+                <td>16.38</td>
               </tr>
               <tr>
                 <td>GRPO</td>
@@ -275,7 +278,7 @@
                 <td>9.25</td>
                 <td>8.21</td>
                 <td>25.13</td>
-                <td>18.08</td>
+                <td>17.16</td>
               </tr>
               <tr>
                 <td>FTRL</td>
@@ -287,7 +290,7 @@
                 <td>11.18</td>
                 <td>9.93</td>
                 <td>26.43</td>
-                <td>20.45</td>
+                <td>19.14</td>
               </tr>
               <tr>
                 <td>ToolRL</td>
@@ -299,7 +302,7 @@
                 <td>8.39</td>
                 <td>8.06</td>
                 <td>25.83</td>
-                <td>18.52</td>
+                <td>17.29</td>
               </tr>
               <tr>
                 <td>CHORD</td>
@@ -311,7 +314,19 @@
                 <td>6.45</td>
                 <td>7.52</td>
                 <td>27.14</td>
-                <td>19.00</td>
+                <td>17.72</td>
+              </tr>
+              <tr>
+                <td>OPSD</td>
+                <td>25.24</td>
+                <td>20.60</td>
+                <td>21.15</td>
+                <td>12.62</td>
+                <td>3.00</td>
+                <td>9.46</td>
+                <td>8.36</td>
+                <td>25.53</td>
+                <td>18.35</td>
               </tr>
               <tr>
                 <td>MatchTIR</td>
@@ -323,7 +338,7 @@
                 <td>9.03</td>
                 <td>9.18</td>
                 <td>32.26</td>
-                <td>21.70</td>
+                <td>20.96</td>
               </tr>
               <tr>
                 <td>SFT→MatchTIR</td>
@@ -335,7 +350,7 @@
                 <td>11.18</td>
                 <td>10.10</td>
                 <td>31.06</td>
-                <td>20.78</td>
+                <td>20.29</td>
               </tr>
               <tr class="ours-row">
                 <td>PACT</td>
@@ -347,7 +362,7 @@
                 <td>13.63</td>
                 <td>11.84</td>
                 <td>34.47</td>
-                <td>24.90</td>
+                <td>23.08</td>
               </tr>
               <tr class="model-row">
                 <td colspan="10">Qwen3-4B</td>
@@ -362,7 +377,7 @@
                 <td>16.34</td>
                 <td>17.28</td>
                 <td>31.86</td>
-                <td>28.31</td>
+                <td>25.91</td>
               </tr>
               <tr>
                 <td>SFT</td>
@@ -374,7 +389,7 @@
                 <td>12.90</td>
                 <td>13.17</td>
                 <td>30.25</td>
-                <td>25.12</td>
+                <td>22.70</td>
               </tr>
               <tr>
                 <td>GRPO</td>
@@ -386,7 +401,7 @@
                 <td>15.48</td>
                 <td>15.49</td>
                 <td>34.47</td>
-                <td>29.14</td>
+                <td>26.93</td>
               </tr>
               <tr>
                 <td>FTRL</td>
@@ -398,7 +413,7 @@
                 <td>16.77</td>
                 <td>16.05</td>
                 <td>43.02</td>
-                <td>31.13</td>
+                <td>30.14</td>
               </tr>
               <tr>
                 <td>ToolRL</td>
@@ -410,7 +425,7 @@
                 <td>17.42</td>
                 <td>17.14</td>
                 <td>34.27</td>
-                <td>28.25</td>
+                <td>26.56</td>
               </tr>
               <tr>
                 <td>CHORD</td>
@@ -422,7 +437,19 @@
                 <td>15.48</td>
                 <td>16.66</td>
                 <td>37.69</td>
-                <td>29.35</td>
+                <td>28.08</td>
+              </tr>
+              <tr>
+                <td>OPSD</td>
+                <td>33.61</td>
+                <td>25.36</td>
+                <td>27.61</td>
+                <td>22.50</td>
+                <td>12.50</td>
+                <td>13.55</td>
+                <td>16.18</td>
+                <td>43.82</td>
+                <td>29.20</td>
               </tr>
               <tr>
                 <td>MatchTIR</td>
@@ -434,7 +461,7 @@
                 <td>14.62</td>
                 <td>18.83</td>
                 <td>47.54</td>
-                <td>32.93</td>
+                <td>32.66</td>
               </tr>
               <tr>
                 <td>SFT→MatchTIR</td>
@@ -442,11 +469,11 @@
                 <td>30.40</td>
                 <td>32.03</td>
                 <td>23.62</td>
-                <td>17.85</td>
+                <td>17.50</td>
                 <td>13.76</td>
-                <td>18.41</td>
+                <td>18.29</td>
                 <td>47.34</td>
-                <td>33.07</td>
+                <td>32.55</td>
               </tr>
               <tr class="ours-row">
                 <td>PACT</td>
@@ -458,12 +485,19 @@
                 <td>18.28</td>
                 <td>21.26</td>
                 <td>49.55</td>
-                <td>36.90</td>
+                <td>35.80</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p class="table-note">Complete main results from the paper. AC denotes Answer Correctness.</p>
+        <p class="table-note">Complete main results from the paper; scores are percentages. AC denotes Answer Correctness. BFCL Avg averages Multi-Turn, Search, and Memory. The final Avg is the equal-weight mean of FTRL Solve-F1, BFCL Avg, and ToolHop AC. Main PACT runs use 24 updates and <em>q</em> = 0.4.</p>
+        <div class="content paper-copy mt-6">
+          <h3>Further analyses</h3>
+          <p><strong>Complementary objectives.</strong> With anchoring disabled (<em>q</em> = 0), trace-conditioned RL plus component-aware SFT reaches 33.21 FTRL Solve-F1 and 20.44 BFCL Avg, compared with 30.18 and 19.38 when the same SFT is paired with prompt-only RL. Under the main configuration (<em>q</em> = 0.4), trace conditioning improves these metrics by 4.73 and 4.81 points over prompt-only RL with the same SFT and anchoring.</p>
+          <p><strong>Complete trace context and separate schedules.</strong> Keeping SFT fixed, removing expert reasoning or tool responses from the RL context reduces FTRL Solve-F1 from 33.21 to 26.12 or 25.94 (<em>q</em> = 0). With tool-call loss-scale annealing fixed, semantic-prefix annealing for reasoning reaches 33.21, compared with 30.60 for fixed reasoning supervision and 29.86 for token-count reasoning annealing.</p>
+          <p><strong>Longer training and different teachers.</strong> At 48 updates, Qwen3-1.7B PACT reaches 27.17 FTRL Solve-F1, 12.62 BFCL Avg, and 40.50 ToolHop AC, exceeding MatchTIR by 3.75, 4.24, and 2.41 points. On a shared set of 1,096 prompts, a Qwen3-4B student trained with either Qwen3-8B or Qwen3-235B traces outperforms the matched SFT and SFT→MatchTIR baselines.</p>
+          <p><strong>Training cost.</strong> The measured Qwen3-4B PACT run uses 65.13 H200 GPU-hours, versus 58.11 for MatchTIR (12.1% more), excluding offline trace construction. Deployment requires no teacher, expert trace, or trace-generation calls. Full settings, controlled context comparisons, and cost breakdowns are in the paper.</p>
+        </div>
       </div>
     </section>
 
